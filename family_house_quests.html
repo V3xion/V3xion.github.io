@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family House Quests</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#FFB800;--gold-light:#FFD85C;--orange:#FF6B35;--orange-light:#FF8C5A;
+  --green:#2ECC71;--green-dark:#27AE60;--blue:#3498DB;--blue-dark:#2980B9;
+  --red:#E74C3C;--purple:#9B59B6;--bg:#FFF9F0;--card:#FFFFFF;
+  --text:#2C2C2C;--text-muted:#888;--border:#F0E8DC;
+  --shadow:0 4px 20px rgba(0,0,0,0.08);--shadow-h:0 8px 30px rgba(0,0,0,0.14);
+  --radius:18px;--radius-sm:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:block;}
+
+/* LOGIN */
+#loginScreen{background:linear-gradient(135deg,#FFF3D6 0%,#FFE8B8 50%,#FFDDA0 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;position:relative;overflow:hidden;}
+#loginScreen.active{display:flex;}
+#loginScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(255,184,0,.15) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(255,107,53,.1) 0%,transparent 50%);}
+.login-logo{font-family:'Fredoka One',cursive;font-size:44px;color:var(--orange);text-align:center;position:relative;line-height:1;margin-bottom:6px;}
+.login-logo span{color:var(--gold);}
+.login-sub{font-size:14px;color:#AA7740;margin-bottom:36px;position:relative;text-align:center;}
+.role-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;position:relative;}
+.role-card{background:white;border-radius:24px;padding:28px 24px;width:200px;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 6px 30px rgba(0,0,0,.1);text-align:center;border:3px solid transparent;}
+.role-card:hover{transform:translateY(-8px) scale(1.03);box-shadow:0 16px 40px rgba(0,0,0,.15);}
+.role-card.p-card:hover{border-color:var(--blue);}
+.role-card.c-card:hover{border-color:var(--orange);}
+.role-emoji{font-size:52px;margin-bottom:12px;display:block;}
+.role-name{font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:4px;}
+.p-card .role-name{color:var(--blue);}
+.c-card .role-name{color:var(--orange);}
+.role-desc{font-size:12px;color:var(--text-muted);}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);}
+.tb-parent{background:rgba(52,152,219,.92);color:white;}
+.tb-child{background:rgba(255,107,53,.92);color:white;}
+.tb-title{font-family:'Fredoka One',cursive;font-size:22px;}
+.tb-right{display:flex;align-items:center;gap:12px;}
+.pts-badge{background:rgba(255,255,255,.25);border-radius:30px;padding:5px 14px;font-weight:800;font-size:15px;}
+.btn-lo{background:rgba(255,255,255,.2);border:none;border-radius:10px;padding:7px 14px;color:white;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s;}
+.btn-lo:hover{background:rgba(255,255,255,.35);}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid var(--border);padding:0 20px;background:white;overflow-x:auto;}
+.tab{padding:14px 20px;font-weight:700;font-size:14px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;color:var(--text-muted);transition:all .2s;}
+.tab.active{color:var(--orange);border-bottom-color:var(--orange);}
+.tc{display:none;padding:20px;}
+.tc.active{display:block;}
+
+/* CARDS */
+.card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px;border:1px solid var(--border);}
+
+/* FORM */
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-weight:700;font-size:13px;margin-bottom:6px;}
+input[type=text],input[type=number],select,textarea{width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:'Nunito',sans-serif;font-size:14px;color:var(--text);background:white;transition:border-color .2s;outline:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--orange);}
+textarea{resize:vertical;min-height:80px;}
+
+/* BUTTONS */
+.btn{padding:11px 22px;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-p{background:var(--orange);color:white;}
+.btn-p:hover{background:var(--orange-light);transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,107,53,.4);}
+.btn-s{background:var(--green);color:white;}
+.btn-s:hover{background:var(--green-dark);transform:translateY(-1px);}
+.btn-d{background:var(--red);color:white;}
+.btn-d:hover{opacity:.9;transform:translateY(-1px);}
+.btn-b{background:var(--blue);color:white;}
+.btn-b:hover{background:var(--blue-dark);transform:translateY(-1px);}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:8px;}
+.btn-full{width:100%;justify-content:center;}
+
+/* QUEST CARD */
+.qc{background:white;border-radius:var(--radius);padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--border);border-left:5px solid var(--border);transition:all .2s;}
+.qc:hover{box-shadow:var(--shadow-h);transform:translateY(-2px);}
+.qc.s-pending{border-left-color:var(--gold);}
+.qc.s-completed{border-left-color:var(--green);}
+.qc.s-approved{border-left-color:var(--blue);}
+.qc.s-rejected{border-left-color:var(--red);}
+.qc.s-assigned{border-left-color:var(--orange);}
+.qh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.qt{font-weight:800;font-size:16px;margin-bottom:4px;}
+.qm{font-size:12px;color:var(--text-muted);}
+.qpts{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#7A4E00;border-radius:20px;padding:4px 12px;font-weight:800;font-size:13px;white-space:nowrap;flex-shrink:0;}
+.qa{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+.sp{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;}
+.sp-pending{background:#FFF3CD;color:#7A5900;}
+.sp-assigned{background:#FFE8D6;color:#7A3000;}
+.sp-completed{background:#D4EDDA;color:#155724;}
+.sp-approved{background:#CCE5FF;color:#004085;}
+.sp-rejected{background:#F8D7DA;color:#721C24;}
+
+/* PHOTO */
+.photo-preview{width:100%;max-height:200px;object-fit:cover;border-radius:12px;margin:10px 0;border:2px solid var(--border);}
+.upload-area{border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:#FAFAFA;}
+.upload-area:hover{border-color:var(--orange);background:#FFF5F0;}
+.upload-area input{display:none;}
+
+/* AI RATING */
+.air{background:linear-gradient(135deg,#F0F4FF,#E8F0FE);border-radius:12px;padding:12px 16px;margin-top:10px;border:1px solid #C5D3F8;}
+.air-t{font-weight:700;font-size:12px;color:#3B5BDB;margin-bottom:6px;}
+.stars{color:var(--gold);font-size:20px;letter-spacing:2px;}
+.air-c{font-size:12px;color:#555;margin-top:4px;font-style:italic;}
+
+/* STATS */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;}
+.scard{background:white;border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow);text-align:center;border:1px solid var(--border);}
+.sv{font-family:'Fredoka One',cursive;font-size:36px;line-height:1;}
+.sl{font-size:12px;color:var(--text-muted);margin-top:4px;font-weight:600;}
+
+/* PROGRESS */
+.pb-wrap{background:#F0F0F0;border-radius:30px;height:12px;overflow:hidden;margin:6px 0;}
+.pb-fill{height:100%;border-radius:30px;background:linear-gradient(90deg,var(--orange),var(--gold));transition:width .5s ease;}
+
+/* LEADERBOARD */
+.lb-row{display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border-radius:12px;margin-bottom:8px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.lb-rank{font-family:'Fredoka One',cursive;font-size:22px;width:36px;text-align:center;}
+.lb-av{font-size:30px;}
+.lb-name{font-weight:800;flex:1;}
+.lb-pts{font-family:'Fredoka One',cursive;font-size:20px;color:var(--gold);}
+.lv-badge{background:linear-gradient(135deg,var(--purple),#7D3C98);color:white;border-radius:20px;padding:4px 14px;font-weight:800;font-size:12px;display:inline-block;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--orange),#FF8C35);border-radius:24px;padding:24px 22px;color:white;margin-bottom:20px;position:relative;overflow:hidden;}
+.hero::after{content:'🏠';position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:64px;opacity:.2;}
+.h-greet{font-size:14px;opacity:.85;}
+.h-name{font-family:'Fredoka One',cursive;font-size:32px;line-height:1.2;}
+.h-level{font-size:13px;opacity:.9;margin-top:6px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--text-muted);}
+.empty-icon{font-size:48px;margin-bottom:12px;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{background:white;border-radius:24px;padding:28px;max-width:460px;width:100%;max-height:90vh;overflow-y:auto;transform:scale(.9);transition:transform .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.overlay.open .modal{transform:scale(1);}
+.modal-title{font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:18px;color:var(--orange);}
+.modal-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+
+/* NOTIF */
+.notif{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#2C2C2C;color:white;border-radius:12px;padding:12px 20px;font-weight:700;font-size:14px;z-index:9999;transition:transform .3s;box-shadow:0 8px 24px rgba(0,0,0,.3);white-space:nowrap;}
+.notif.show{transform:translateX(-50%) translateY(0);}
+
+/* MISC */
+.sec-title{font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:14px;color:var(--text);}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;}
+.tag-daily{background:#E8F5E9;color:#2E7D32;}
+.tag-weekly{background:#E3F2FD;color:#1565C0;}
+.tag-special{background:#F3E5F5;color:#6A1B9A;}
+@media(max-width:480px){.role-cards{flex-direction:column;align-items:center;}.role-card{width:100%;max-width:280px;}.tab{padding:12px 14px;font-size:13px;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="screen active">
+  <div class="login-logo">🏠 Family<span>Quests</span></div>
+  <div class="login-sub">Complete chores. Earn points. Level up! ⭐</div>
+  <div class="role-cards">
+    <div class="role-card p-card" onclick="login('parent')">
+      <span class="role-emoji">👨‍👩‍👧</span>
+      <div class="role-name">Parent</div>
+      <div class="role-desc">Assign quests &amp; approve completions</div>
+    </div>
+    <div class="role-card c-card" onclick="loginChild()">
+      <span class="role-emoji">🧒</span>
+      <div class="role-name">Child</div>
+      <div class="role-desc">Complete quests &amp; earn rewards</div>
+    </div>
+  </div>
+</div>
+
+<!-- CHILD PICK MODAL -->
+<div class="overlay" id="childPickModal">
+  <div class="modal">
+    <div class="modal-title">Who are you? 👋</div>
+    <div id="childPickList"></div>
+    <div class="modal-actions"><button class="btn btn-d" onclick="closeModal('childPickModal')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- PARENT SCREEN -->
+<div id="parentScreen" class="screen">
+  <div class="topbar tb-parent">
+    <div class="tb-title">🏠 FamilyQuests</div>
+    <div class="tb-right">
+      <span style="font-size:13px;opacity:.85">Parent</span>
+      <button class="btn-lo" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="tabs" id="parentTabs">
+    <div class="tab active" onclick="showTab('parent','assign')">📋 Assign</div>
+    <div class="tab" onclick="showTab('parent','review')">🔍 Review <span id="pendingBadge"></span></div>
+    <div class="tab" onclick="showTab('parent','dashboard')">📊 Dashboard</div>
+    <div class="tab" onclick="showTab('parent','family')">👨‍👩‍👧 Family</div>
+  </div>
+
+  <div id="parent-assign" class="tc active">
+    <div class="card">
+      <div class="sec-title">Create a New Quest</div>
+      <div class="fg"><label>Quest Title</label><input type="text" id="qTitle" placeholder="e.g. Clean your bedroom"></div>
+      <div class="fg"><label>Description</label><textarea id="qDesc" placeholder="Describe what needs to be done..."></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="fg"><label>Points 🪙</label><input type="number" id="qPts" value="20" min="5" max="200" step="5"></div>
+        <div class="fg"><label>Type</label><select id="qType"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="special">Special</option></select></div>
+      </div>
+      <div class="fg"><label>Assign To</label><select id="qChild"></select></div>
+      <button class="btn btn-p btn-full" onclick="createQuest()">🚀 Assign Quest</button>
+    </div>
+    <div class="sec-title">All Quests</div>
+    <div id="allQuestsList"></div>
+  </div>
+
+  <div id="parent-review" class="tc">
+    <div class="sec-title">Pending Approvals 🔍</div>
+    <div id="reviewList"></div>
+  </div>
+
+  <div id="parent-dashboard" class="tc">
+    <div class="sec-title">Family Dashboard 📊</div>
+    <div class="sgrid" id="parentStats"></div>
+    <div class="sec-title">Leaderboard 🏆</div>
+    <div id="leaderboard"></div>
+    <div class="sec-title" style="margin-top:20px">Quest Summary</div>
+    <div id="questSummary"></div>
+  </div>
+
+  <div id="parent-family" class="tc">
+    <div class="card">
+      <div class="sec-title">Add a Child</div>
+      <div class="fg"><label>Name</label><input type="text" id="newName" placeholder="e.g. Ahmed"></div>
+      <div class="fg"><label>Avatar</label>
+        <select id="newAvatar">
+          <option value="🧒">🧒 Kid</option><option value="👦">👦 Boy</option><option value="👧">👧 Girl</option>
+          <option value="🧑">🧑 Teen</option><option value="⭐">⭐ Star</option><option value="🦁">🦁 Lion</option>
+          <option value="🐯">🐯 Tiger</option><option value="🐻">🐻 Bear</option>
+        </select>
+      </div>
+      <button class="btn btn-b btn-full" onclick="addChild()">➕ Add Child</button>
+    </div>
+    <div class="sec-title">Family Members</div>
+    <div id="familyList"></div>
+  </div>
+</div>
+
+<!-- CHILD SCREEN -->
+<div id="childScreen" class="screen">
+  <div class="topbar tb-child">
+    <div class="tb-title">⚔️ My Quests</div>
+    <div class="tb-right">
+      <div class="pts-badge">🪙 <span id="childPts">0</span></div>
+      <button class="btn-lo" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="tabs" id="childTabs">
+    <div class="tab active" onclick="showTab('child','home')">🏠 Home</div>
+    <div class="tab" onclick="showTab('child','quests')">⚔️ Quests</div>
+    <div class="tab" onclick="showTab('child','rewards')">🏆 Rewards</div>
+  </div>
+  <div id="child-home" class="tc active">
+    <div class="hero" id="childHero"></div>
+    <div class="sec-title">Active Quests</div>
+    <div id="childActiveQ"></div>
+  </div>
+  <div id="child-quests" class="tc">
+    <div class="sec-title">All My Quests</div>
+    <div id="childAllQ"></div>
+  </div>
+  <div id="child-rewards" class="tc">
+    <div id="childRewardsContent"></div>
+  </div>
+</div>
+
+<!-- SUBMIT MODAL -->
+<div class="overlay" id="submitModal">
+  <div class="modal">
+    <div class="modal-title">📸 Submit Quest Proof</div>
+    <div id="submitInfo" class="card" style="margin-bottom:14px;padding:12px 14px;"></div>
+    <div class="upload-area" onclick="document.getElementById('photoInput').click()">
+      <input type="file" id="photoInput" accept="image/*" onchange="previewPhoto(event)">
+      <div id="photoPlaceholder"><div style="font-size:36px;margin-bottom:8px">📷</div><div style="font-weight:700;color:var(--text-muted)">Tap to take / upload a photo</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">Show proof that the quest is done!</div></div>
+      <img id="photoImg" class="photo-preview" style="display:none">
+    </div>
+    <div id="aiResult" style="display:none"></div>
+    <div class="modal-actions">
+      <button class="btn btn-d" onclick="closeModal('submitModal')">Cancel</button>
+      <button class="btn btn-s" id="submitBtn" onclick="submitQuest()" disabled>✅ Submit for Approval</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="overlay" id="reviewModal">
+  <div class="modal">
+    <div class="modal-title">🔍 Review Submission</div>
+    <div id="reviewContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-d" onclick="decideQuest('rejected')">❌ Reject</button>
+      <button class="btn btn-s" onclick="decideQuest('approved')">✅ Approve &amp; Award Points</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+const LEVELS=[{name:'Rookie',min:0},{name:'Explorer',min:100},{name:'Champion',min:250},{name:'Hero',min:500},{name:'Legend',min:900},{name:'Grand Master',min:1500}];
+function getLv(pts){let l=LEVELS[0];for(const x of LEVELS){if(pts>=x.min)l=x;else break;}return l;}
+function nextLv(pts){for(let i=1;i<LEVELS.length;i++){if(LEVELS[i].min>pts)return LEVELS[i];}return null;}
+
+let S={
+  children:[
+    {id:'c1',name:'Ahmed', avatar:'👦',points:120,earned:200,level:3},
+    {id:'c2',name:'Fatima',avatar:'👧',points:85, earned:150,level:2},
+  ],
+  quests:[
+    {id:'q1',title:'Clean Bedroom',   desc:'Tidy up and make the bed.',             pts:20,type:'daily',  cid:'c1',status:'approved', photo:null,air:4,aic:'Room looks neat and well organized!'},
+    {id:'q2',title:'Wash the Dishes', desc:'Wash all dishes and dry them.',          pts:15,type:'daily',  cid:'c2',status:'assigned', photo:null,air:null},
+    {id:'q3',title:'Water the Plants',desc:'Water all plants in the garden.',        pts:10,type:'weekly', cid:'c1',status:'pending',  photo:'demo',air:3,aic:'Plants appear watered, good job!'},
+    {id:'q4',title:'Read 30 mins',    desc:'Read any book for at least 30 minutes.',pts:25,type:'daily',  cid:'c2',status:'completed',photo:'demo',air:5,aic:'Excellent effort! Book clearly visible.'},
+  ],
+  user:null,questId:null
+};
+
+function save(){try{localStorage.setItem('fhq2',JSON.stringify({children:S.children,quests:S.quests}));}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem('fhq2')||'null');if(d){S.children=d.children;S.quests=d.quests;}}catch(e){}}
+
+function login(role){S.user=role;show(role==='parent'?'parentScreen':'childScreen');if(role==='parent')renderParent();}
+function loginChild(){
+  const el=document.getElementById('childPickList');
+  el.innerHTML=S.children.map(c=>`<div class="lb-row" style="cursor:pointer" onclick="pickChild('${c.id}')"><div class="lb-av">${c.avatar}</div><div class="lb-name">${c.name}</div><div class="lb-pts">🪙${c.points}</div></div>`).join('')||'<div class="empty"><p>No children yet. Ask a parent!</p></div>';
+  openM('childPickModal');
+}
+function pickChild(id){closeM('childPickModal');S.user=id;show('childScreen');renderChild();}
+function logout(){S.user=null;show('loginScreen');}
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showTab(role,tab){
+  const tabs=document.querySelectorAll(`#${role}Tabs .tab`);
+  const tcs=document.querySelectorAll(`#${role}Screen .tc`);
+  tabs.forEach(t=>t.classList.remove('active'));tcs.forEach(t=>t.classList.remove('active'));
+  const order=role==='parent'?['assign','review','dashboard','family']:['home','quests','rewards'];
+  const i=order.indexOf(tab);if(tabs[i])tabs[i].classList.add('active');
+  const el=document.getElementById(`${role}-${tab}`);if(el)el.classList.add('active');
+  if(role==='parent'){if(tab==='review')renderReview();if(tab==='dashboard')renderDashboard();if(tab==='family')renderFamily();if(tab==='assign')renderAssign();}
+  else{if(tab==='quests')renderChildQ();if(tab==='rewards')renderRewards();if(tab==='home')renderChild();}
+}
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+// legacy alias
+function closeModal(id){closeM(id);}
+
+/* PARENT */
+function renderParent(){renderAssign();badge();}
+function badge(){const n=S.quests.filter(q=>q.status==='pending').length;document.getElementById('pendingBadge').textContent=n?`(${n})`:'`';}
+
+function renderAssign(){
+  const sel=document.getElementById('qChild');
+  sel.innerHTML=S.children.map(c=>`<option value="${c.id}">${c.avatar} ${c.name}</option>`).join('');
+  const el=document.getElementById('allQuestsList');
+  el.innerHTML=S.quests.length?S.quests.map(q=>qCard(q,'parent')).join(''):'<div class="empty"><div class="empty-icon">📋</div><p>No quests yet. Create one above!</p></div>';
+}
+
+function renderReview(){
+  const pend=S.quests.filter(q=>q.status==='pending');
+  document.getElementById('reviewList').innerHTML=pend.length?pend.map(q=>{
+    const c=S.children.find(x=>x.id===q.cid);
+    return `<div class="qc s-pending">
+      <div class="qh"><div><div class="qt">${q.title}</div><div class="qm">${c?.avatar||''} ${c?.name||'?'} • ${q.type}</div></div><div class="qpts">🪙${q.pts}</div></div>
+      ${q.air?`<div class="air"><div class="air-t">🤖 AI Rating</div><div class="stars">${'★'.repeat(q.air)}${'☆'.repeat(5-q.air)}</div><div class="air-c">"${q.aic}"</div></div>`:''}
+      <div class="qa"><button class="btn btn-b btn-sm" onclick="openReview('${q.id}')">🔍 Review Photo</button></div>
+    </div>`;
+  }).join(''):'<div class="empty"><div class="empty-icon">✅</div><p>Nothing to review right now!</p></div>';
+  badge();
+}
+
+function renderDashboard(){
+  const tot=S.quests.length,app=S.quests.filter(q=>q.status==='approved').length,pen=S.quests.filter(q=>q.status==='pending').length,tpts=S.children.reduce((a,c)=>a+c.earned,0);
+  document.getElementById('parentStats').innerHTML=`
+    <div class="scard"><div class="sv" style="color:var(--blue)">${tot}</div><div class="sl">Total Quests</div></div>
+    <div class="scard"><div class="sv" style="color:var(--green)">${app}</div><div class="sl">Approved</div></div>
+    <div class="scard"><div class="sv" style="color:var(--gold)">${pen}</div><div class="sl">Pending</div></div>
+    <div class="scard"><div class="sv" style="color:var(--orange)">${tpts}</div><div class="sl">Points Awarded</div></div>`;
+  const sorted=[...S.children].sort((a,b)=>b.earned-a.earned);
+  const med=['🥇','🥈','🥉'];
+  document.getElementById('leaderboard').innerHTML=sorted.map((c,i)=>{
+    const lv=getLv(c.earned);
+    return `<div class="lb-row"><div class="lb-rank">${med[i]||`#${i+1}`}</div><div class="lb-av">${c.avatar}</div><div><div class="lb-name">${c.name}</div><span class="lv-badge">Lv.${c.level} ${lv.name}</span></div><div class="lb-pts">🪙${c.earned}</div></div>`;
+  }).join('')||'<div class="empty"><p>No children yet</p></div>';
+  const sc={};S.quests.forEach(q=>{sc[q.status]=(sc[q.status]||0)+1;});
+  document.getElementById('questSummary').innerHTML=Object.entries(sc).map(([s,n])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span class="sp sp-${s}">${s}</span><strong>${n} quest${n>1?'s':''}</strong></div>`).join('');
+}
+
+function renderFamily(){
+  const el=document.getElementById('familyList');
+  if(!S.children.length){el.innerHTML='<div class="empty"><div class="empty-icon">👨‍👩‍👧</div><p>No children added yet.</p></div>';return;}
+  el.innerHTML=S.children.map(c=>{
+    const lv=getLv(c.earned),nl=nextLv(c.earned);
+    const pct=nl?Math.round(((c.earned-lv.min)/(nl.min-lv.min))*100):100;
+    const mq=S.quests.filter(q=>q.cid===c.id),done=mq.filter(q=>q.status==='approved').length;
+    return `<div class="card">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+        <div style="font-size:44px">${c.avatar}</div>
+        <div style="flex:1"><div style="font-weight:800;font-size:18px">${c.name}</div><span class="lv-badge">Lv.${c.level} ${lv.name}</span></div>
+        <div style="text-align:right"><div style="font-family:'Fredoka One',cursive;font-size:24px;color:var(--gold)">🪙${c.points}</div><div style="font-size:11px;color:var(--text-muted)">available</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Level progress ${nl?`→ ${nl.name}`:''}</div>
+      <div class="pb-wrap"><div class="pb-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px">${pct}% • ${done}/${mq.length} quests approved</div>
+      <button class="btn btn-d btn-sm" style="margin-top:12px" onclick="removeChild('${c.id}')">🗑 Remove</button>
+    </div>`;
+  }).join('');
+}
+
+/* CHILD */
+function renderChild(){
+  const c=S.children.find(x=>x.id===S.user);if(!c)return;
+  document.getElementById('childPts').textContent=c.points;
+  const lv=getLv(c.earned),nl=nextLv(c.earned);
+  const pct=nl?Math.round(((c.earned-lv.min)/(nl.min-lv.min))*100):100;
+  document.getElementById('childHero').innerHTML=`
+    <div class="h-greet">Welcome back,</div>
+    <div class="h-name">${c.avatar} ${c.name}!</div>
+    <div class="h-level">Level ${c.level} ${lv.name} • 🪙 ${c.points} points available</div>
+    <div style="margin-top:12px">
+      <div style="font-size:11px;opacity:.8;margin-bottom:4px">${nl?`Progress to ${nl.name} (${pct}%)`:'Max level reached! 🎉'}</div>
+      <div style="background:rgba(255,255,255,.25);border-radius:30px;height:8px;overflow:hidden"><div style="height:100%;width:${pct}%;background:white;border-radius:30px;transition:width .5s"></div></div>
+    </div>`;
+  const active=S.quests.filter(q=>q.cid===c.id&&['assigned','pending'].includes(q.status));
+  document.getElementById('childActiveQ').innerHTML=active.length?active.map(q=>qCard(q,'child')).join(''):'<div class="empty"><div class="empty-icon">🎉</div><p>All caught up! No active quests.</p></div>';
+}
+
+function renderChildQ(){
+  const c=S.children.find(x=>x.id===S.user);if(!c)return;
+  const mq=S.quests.filter(q=>q.cid===c.id);
+  document.getElementById('childAllQ').innerHTML=mq.length?mq.map(q=>qCard(q,'child')).join(''):'<div class="empty"><div class="empty-icon">📋</div><p>No quests assigned yet!</p></div>';
+}
+
+function renderRewards(){
+  const c=S.children.find(x=>x.id===S.user);if(!c)return;
+  const done=S.quests.filter(q=>q.cid===c.id&&q.status==='approved').length;
+  const lv=getLv(c.earned),nl=nextLv(c.earned);
+  const pct=nl?Math.round(((c.earned-lv.min)/(nl.min-lv.min))*100):100;
+  document.getElementById('childRewardsContent').innerHTML=`
+    <div class="card" style="text-align:center;padding:28px">
+      <div style="font-size:60px;margin-bottom:12px">${c.avatar}</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:26px">${c.name}</div>
+      <span class="lv-badge" style="margin:8px 0;display:inline-block">Level ${c.level} — ${lv.name}</span>
+      <div style="font-family:'Fredoka One',cursive;font-size:40px;color:var(--gold);margin:12px 0">🪙 ${c.earned}</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Total points ever earned</div>
+      ${nl?`<div style="font-size:13px;font-weight:700;margin-bottom:6px">Progress to ${nl.name}</div><div class="pb-wrap"><div class="pb-fill" style="width:${pct}%"></div></div><div style="font-size:12px;color:var(--text-muted);margin-top:6px">${nl.min-c.earned} more points needed</div>`:'<div style="color:var(--gold);font-weight:800">🏆 Maximum level reached!</div>'}
+    </div>
+    <div class="sgrid">
+      <div class="scard"><div class="sv" style="color:var(--green)">${done}</div><div class="sl">Quests Done</div></div>
+      <div class="scard"><div class="sv" style="color:var(--orange)">${c.points}</div><div class="sl">Available 🪙</div></div>
+      <div class="scard"><div class="sv" style="color:var(--blue)">${c.level}</div><div class="sl">Level</div></div>
+    </div>
+    <div class="card"><div class="sec-title">🏅 Level Milestones</div>
+      ${LEVELS.map(l=>{const ok=c.earned>=l.min;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-weight:700;color:${ok?'var(--green)':'var(--text-muted)'}">${ok?'✅':'🔒'} ${l.name}</span><span style="font-size:12px;color:var(--text-muted)">🪙 ${l.min}</span></div>`;}).join('')}
+    </div>`;
+}
+
+/* QUEST CARD */
+function qCard(q,role){
+  const c=S.children.find(x=>x.id===q.cid);
+  let actions='';
+  if(role==='parent'){
+    actions=q.status==='pending'
+      ?`<button class="btn btn-b btn-sm" onclick="openReview('${q.id}')">🔍 Review</button><button class="btn btn-d btn-sm" onclick="delQ('${q.id}')">🗑</button>`
+      :`<button class="btn btn-d btn-sm" onclick="delQ('${q.id}')">🗑 Delete</button>`;
+  } else {
+    if(q.status==='assigned')actions=`<button class="btn btn-p btn-sm" onclick="openSubmit('${q.id}')">📸 Submit Proof</button>`;
+    if(q.status==='rejected')actions=`<button class="btn btn-p btn-sm" onclick="openSubmit('${q.id}')">🔄 Resubmit</button>`;
+  }
+  return `<div class="qc s-${q.status}">
+    <div class="qh">
+      <div>
+        <div class="qt">${q.title}</div>
+        <div class="qm" style="margin:4px 0">${role==='parent'?`${c?.avatar||''} ${c?.name||'?'} • `:''}<span class="tag tag-${q.type}">${q.type}</span></div>
+        <div class="qm">${q.desc||''}</div>
+      </div>
+      <div style="text-align:right"><div class="qpts">🪙${q.pts}</div><div style="margin-top:6px"><span class="sp sp-${q.status}">${q.status}</span></div></div>
+    </div>
+    ${q.air?`<div class="air"><div class="air-t">🤖 AI: ${'★'.repeat(q.air)}${'☆'.repeat(5-q.air)}</div><div class="air-c">"${q.aic}"</div></div>`:''}
+    ${actions?`<div class="qa">${actions}</div>`:''}
+  </div>`;
+}
+
+/* ACTIONS */
+function createQuest(){
+  const title=document.getElementById('qTitle').value.trim();
+  const desc=document.getElementById('qDesc').value.trim();
+  const pts=parseInt(document.getElementById('qPts').value)||20;
+  const type=document.getElementById('qType').value;
+  const cid=document.getElementById('qChild').value;
+  if(!title){notify('Please enter a quest title! 📝');return;}
+  if(!cid){notify('Please select a child! 👶');return;}
+  S.quests.unshift({id:'q'+Date.now(),title,desc,pts,type,cid,status:'assigned',photo:null,air:null,aic:null});
+  save();document.getElementById('qTitle').value='';document.getElementById('qDesc').value='';
+  notify(`Quest "${title}" assigned! 🚀`);renderAssign();
+}
+
+function delQ(id){S.quests=S.quests.filter(q=>q.id!==id);save();renderAssign();notify('Quest deleted 🗑');}
+
+function addChild(){
+  const name=document.getElementById('newName').value.trim();
+  const avatar=document.getElementById('newAvatar').value;
+  if(!name){notify('Enter a name! 👤');return;}
+  S.children.push({id:'c'+Date.now(),name,avatar,points:0,earned:0,level:1});
+  document.getElementById('newName').value='';save();renderFamily();renderAssign();
+  notify(`${avatar} ${name} added! 👨‍👩‍👧`);
+}
+function removeChild(id){S.children=S.children.filter(c=>c.id!==id);S.quests=S.quests.filter(q=>q.cid!==id);save();renderFamily();renderAssign();notify('Child removed');}
+
+/* SUBMIT */
+let photoData=null;
+function openSubmit(qid){
+  const q=S.quests.find(x=>x.id===qid);if(!q)return;
+  S.questId=qid;photoData=null;
+  document.getElementById('submitInfo').innerHTML=`<strong>${q.title}</strong> • 🪙${q.pts} pts<br><span style="font-size:12px;color:var(--text-muted)">${q.desc||''}</span>`;
+  document.getElementById('photoPlaceholder').style.display='block';
+  document.getElementById('photoImg').style.display='none';
+  document.getElementById('aiResult').style.display='none';
+  document.getElementById('submitBtn').disabled=true;
+  document.getElementById('photoInput').value='';
+  openM('submitModal');
+}
+
+function previewPhoto(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    photoData=ev.target.result;
+    document.getElementById('photoPlaceholder').style.display='none';
+    const img=document.getElementById('photoImg');img.src=photoData;img.style.display='block';
+    runAI();
+  };r.readAsDataURL(file);
+}
+
+function runAI(){
+  const el=document.getElementById('aiResult');
+  el.style.display='block';
+  el.innerHTML='<div class="air"><div class="air-t">🤖 AI is rating your submission...</div><div style="color:var(--text-muted);font-size:13px">⏳ Analysing photo...</div></div>';
+  setTimeout(()=>{
+    const r=Math.floor(Math.random()*3)+3;
+    const comments=['Great work! The task looks well completed.','Excellent effort! Clear and convincing photo.','Good job! The quest appears done properly.','Well done! Nice clear photo.','Solid completion! Task carried out well.'];
+    const comment=comments[Math.floor(Math.random()*comments.length)];
+    const q=S.quests.find(x=>x.id===S.questId);
+    if(q){q.air=r;q.aic=comment;}
+    el.innerHTML=`<div class="air"><div class="air-t">🤖 AI Rating Complete</div><div class="stars">${'★'.repeat(r)}${'☆'.repeat(5-r)}</div><div class="air-c">"${comment}"</div></div>`;
+    document.getElementById('submitBtn').disabled=false;
+  },1800);
+}
+
+function submitQuest(){
+  const q=S.quests.find(x=>x.id===S.questId);if(!q)return;
+  q.photo=photoData||'demo';q.status='pending';save();
+  closeM('submitModal');notify('Quest submitted! Waiting for approval ⏳');
+  renderChild();badge();
+}
+
+/* REVIEW */
+function openReview(qid){
+  const q=S.quests.find(x=>x.id===qid);if(!q)return;
+  S.questId=qid;
+  const c=S.children.find(x=>x.id===q.cid);
+  document.getElementById('reviewContent').innerHTML=`
+    <div class="card" style="margin-bottom:12px;padding:14px">
+      <strong style="font-size:16px">${q.title}</strong><br>
+      <span style="font-size:13px;color:var(--text-muted)">${c?.avatar||''} ${c?.name||''} • 🪙${q.pts}</span><br>
+      <span style="font-size:12px;color:var(--text-muted)">${q.desc||''}</span>
+    </div>
+    ${q.photo&&q.photo!=='demo'?`<img src="${q.photo}" class="photo-preview" alt="proof">`:q.photo==='demo'?`<div style="background:#F0F4FF;border-radius:12px;padding:24px;text-align:center;margin:10px 0;font-size:36px">📷<br><span style="font-size:12px;color:var(--text-muted)">Submission photo</span></div>`:''}
+    ${q.air?`<div class="air"><div class="air-t">🤖 AI Rating</div><div class="stars">${'★'.repeat(q.air)}${'☆'.repeat(5-q.air)}</div><div class="air-c">"${q.aic}"</div></div>`:''}`;
+  openM('reviewModal');
+}
+
+function decideQuest(dec){
+  const q=S.quests.find(x=>x.id===S.questId);if(!q)return;
+  q.status=dec;
+  if(dec==='approved'){
+    const c=S.children.find(x=>x.id===q.cid);
+    if(c){c.points+=q.pts;c.earned+=q.pts;c.level=LEVELS.filter(l=>c.earned>=l.min).length;notify(`✅ Approved! 🪙 +${q.pts} awarded to ${c.name}`);}
+  } else {notify('❌ Quest rejected. Child can resubmit.');}
+  save();closeM('reviewModal');renderReview();badge();
+}
+
+/* NOTIF */
+function notify(msg){const el=document.getElementById('notif');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
+
+/* BADGE fix */
+function badge(){const n=S.quests.filter(q=>q.status==='pending').length;const el=document.getElementById('pendingBadge');if(el)el.textContent=n?`(${n})`:'`';}
+
+load();
+</script>
+</body>
+</html>
